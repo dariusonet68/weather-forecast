@@ -3,103 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-      crossorigin="anonymous"
-    />
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
-    ></script>
-    <script src="./script.js"></script>
+    <link rel="stylesheet" href="style.css" />
+    <title>Aplicatie meteo</title>
   </head>
   <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">Weather</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
+    <div class="page-container">
+      <div class="sidebar">
+        <form id="cityForm" class="city-form">
+          <label for="city">Introduceti orasul</label>
+          <input
+            id="city"
+            type="text"
+            placeholder="Timisoara, Cluj, Bucuresti"
+            required
+          />
+          <button class="btn btn-search">Cauta</button>
+        </form>
+        <div class="separator">
+          <span class="separator-text">sau</span>
+        </div>
+        <button id="locationBtn" class="btn btn-location">
+          Foloseste locatia curenta
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#"
-                >Favorite</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Setari</a>
-            </li>
-          </ul>
-        </div>
       </div>
-    </nav>
 
-    <!-- search -->
-    <div class="container-fluid">
-      <form class="d-flex" id="searchForm">
-        <input
-          class="form-control me-2"
-          type="search"
-          id="cityInput"
-          placeholder="Search"
-          aria-label="Search"
-        />
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-
-      <div>
-        <p>Locatie curenta</p>
-      </div>
+      <div class="page-content"></div>
     </div>
 
-    <!-- locatii recente -->
-    <div class="mt-5 p-4">
-      <h3>LOCATII RECENTE</h3>
-    </div>
-
-    <!-- Carduri locatie -->
-    <div class="d-flex justify-content-around row-3 mt-3">
-      <!-- Carduri vor fi generate de JavaScript -->
-    </div>
-
-    <!-- card vreme pe o zi -->
-    <div class="d-flex justify-content-around row-3 mt-5">
-      <div class="card d-flex" style="width: 700px; height: 300px">
-        <div class="card-body">
-          <h5 class="card-title" id="currentCity">Lugoj</h5>
-          <h6
-            class="card-subtitle mb-2 text-body-secondary"
-            id="currentCountry"
-          >
-            Romania
-          </h6>
-          <p class="card-text" id="currentWeatherImg">IMG</p>
-          <p class="card-text" id="currentTemp">32</p>
-          <h6
-            class="card-subtitle mb-2 text-body-secondary"
-            id="currentFeelsLike"
-          >
-            Se resimte ca 35
-          </h6>
-        </div>
-      </div>
-    </div>
-
-    <!-- carduri vreme pe 5 zile -->
-    <div id="weather" class="d-flex flex-column align-items-center"></div>
+    <script src="script.js"></script>
   </body>
 </html>

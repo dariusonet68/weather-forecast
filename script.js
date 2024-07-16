@@ -1,82 +1,107 @@
-const baseUrl = 'https://api.openweathermap.org/data/2.5/forecast';
-const weatherDiv = document.getElementById('weather');
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('cityForm');
+  const locationBtn = document.getElementById('locationBtn');
+  const pageContent = document.querySelector('.page-content');
+  const apiKey = 'bcea0a9e3129809c0730d2c96d86ef36';
 
-document.getElementById('searchForm').addEventListener('submit', function (e) {
-  e.preventDefault();
-  const city = document.getElementById('cityInput').value;
-  if (city) {
-    getWeather(city);
-  }
-});
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const city = document.getElementById('city').value;
+    getWeatherByCity(city);
+  });
 
-async function getWeather(city) {
-  const apiUrl = `${baseUrl}?q=${city}&units=metric&appid=${apiKey}`;
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-    if (response.ok) {
-      displayWeather(data);
+  locationBtn.addEventListener('click', () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        getWeatherByLocation(lat, lon);
+      }, showError);
     } else {
-      alert(data.message);
-    }
-  } catch (error) {
-    console.error('Eroare la obținerea datelor meteo:', error);
-  }
-}
-
-function displayWeather(data) {
-  weatherDiv.innerHTML = '';
-
-  const currentWeather = data.list[0];
-  document.getElementById('currentCity').innerText = data.city.name;
-  document.getElementById('currentCountry').innerText = data.city.country;
-  document.getElementById(
-    'currentTemp'
-  ).innerText = `${currentWeather.main.temp}°C`;
-  document.getElementById(
-    'currentFeelsLike'
-  ).innerText = `Se resimte ca ${currentWeather.main.feels_like}°C`;
-  document.getElementById('currentWeatherImg').innerText =
-    currentWeather.weather[0].description;
-
-  // prognoza pentru 5 zile
-  const days = {};
-  data.list.forEach((forecast) => {
-    const date = new Date(forecast.dt * 1000);
-    const day = date.toLocaleDateString('ro-RO', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    });
-
-    if (!days[day]) {
-      days[day] = {
-        date: date.toLocaleDateString('ro-RO'),
-        temp: forecast.main.temp,
-        feels_like: forecast.main.feels_like,
-        description: forecast.weather[0].description,
-      };
+      alert('Geolocation is not supported by this browser.');
     }
   });
 
-  for (const day in days) {
-    const weatherCard = document.createElement('div');
-    weatherCard.className = 'card d-flex mb-3';
-    weatherCard.style.width = '900px';
-    weatherCard.style.height = '100px';
+  function getWeatherByCity(city) {
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        displayCurrentWeather(data);
+        return fetch(
+          `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`
+        );
+      })
+      .then((response) => response.json())
+      .then((data) => displayForecast(data))
+      .catch((error) => console.error('Error:', error));
+  }
 
-    weatherCard.innerHTML = `
-            <div class="card-body d-flex row-3 justify-content-around">
-                <h5 class="card-title">${day}</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary">${days[day].date}</h6>
-                <p class="card-text">${days[day].description}</p>
-                <p class="card-text">${days[day].temp}°C</p>
-                <h6 class="card-subtitle mb-2 text-body-secondary">Se resimte ca ${days[day].feels_like}°C</h6>
+  function getWeatherByLocation(lat, lon) {
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        displayCurrentWeather(data);
+        return fetch(
+          `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
+        );
+      })
+      .then((response) => response.json())
+      .then((data) => displayForecast(data))
+      .catch((error) => console.error('Error:', error));
+  }
+
+  function displayCurrentWeather(data) {
+    const weatherHtml = `
+            <div class="weather-card current-weather">
+                <h2>${data.name}, ${data.sys.country}</h2>
+                <h3>${data.weather[0].description}</h3>
+                <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="weather icon">
+                <h3>${data.main.temp} &deg;C</h3>
+                <h4>Umiditate: ${data.main.humidity}%</h4>
+                <h4>Viteza vantului: ${data.wind.speed} m/s</h4>
             </div>
         `;
-
-    weatherDiv.appendChild(weatherCard);
+    pageContent.innerHTML = weatherHtml;
   }
-}
 
-getWeather('Lugoj');
+  function displayForecast(data) {
+    const forecastHtml = data.list
+      .filter((_, index) => index % 8 === 0 && index > 0)
+      .slice(0, 5)
+      .map(
+        (forecast) => `
+            <div class="weather-card forecast-weather">
+                <h4>${new Date(forecast.dt_txt).toLocaleDateString()}</h4>
+                <img src="http://openweathermap.org/img/wn/${
+                  forecast.weather[0].icon
+                }@2x.png" alt="weather icon">
+                <p>${forecast.weather[0].description}</p>
+                <p>${forecast.main.temp} &deg;C</p>
+            </div>
+        `
+      )
+      .join('');
+    pageContent.innerHTML += `<div class="forecast-container">${forecastHtml}</div>`;
+  }
+
+  function showError(error) {
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        alert('User denied the request for Geolocation.');
+        break;
+      case error.POSITION_UNAVAILABLE:
+        alert('Location information is unavailable.');
+        break;
+      case error.TIMEOUT:
+        alert('The request to get user location timed out.');
+        break;
+      case error.UNKNOWN_ERROR:
+        alert('An unknown error occurred.');
+        break;
+    }
+  }
+});
